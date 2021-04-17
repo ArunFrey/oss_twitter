@@ -29,7 +29,11 @@ In this tutorial you will learn how to:
 
 * Use the `rtweet` package to query the Twitter API
 
-* collect different types of data on protest
+* Locate tweeters on map
+
+* Collect different types of data on protest
+
+* Predict user type from account (bot yes/no)
 
 
 ## Setup
@@ -117,7 +121,6 @@ The `create_token()` function will save your access token as an environment vari
 
 Once you have all of these keys and tokens recorded somewhere safe, you are ready to collect data!
 
-
 ## Querying the Twitter API with `rtweet`
 
 The `rtweet` package makes it very easy to collect and analyse Twitter data, including individual tweets, or follower and friendship networks.
@@ -198,8 +201,7 @@ ts_plot(blm_tweets, "1 hour") +
 
 ![](01_analyse_twitter_data_files/figure-html/plot timeline-1.png)<!-- -->
 
-We can see that all 15,000 tweets capture only one day of the online discourse surrounding Black Lives Matter on Twitter. What's more, the plot reveals that users are more active during certain periods of the day--right before sleep and in the early afternoon. 
-
+We can see that all 1500 tweets capture only a small fraction of the online discussion surrounding Black Lives Matter on Twitter. What's more, the plot reveals that users are more active during certain periods of the day.
 
 # Studying protests using Twitter 
 
@@ -208,6 +210,11 @@ Next, we turn our attention to using Twitter data to study protest events, and f
 Below is a map of all geolocated tweets that were sent on January 21, 2017, the day of the Women's March protest, showing that users across the world tweeted about the event.
 
 ![](01_analyse_twitter_data_files/figure-html/load WM data-1.png)<!-- -->
+
+We can manipulate these data into a `SpatialPointsDataFrame`, making sure the CRS is correctly defined, allowing us to plot the points easily using base R plotting functions. The CRS stands for "Coordinate Reference System," which controls the "projection" of the map we wish to visualize--i.e., how it looks. For more info. on map projections, see [this guide](https://docs.qgis.org/2.8/en/docs/gentle_gis_introduction/coordinate_reference_systems.html).
+
+
+Manipulating the data in this way will be helpful when clipping to the boundaries of shapefiles as we go on to describe below.
 
 
 ```r
@@ -221,8 +228,9 @@ plot(points)
 
 ![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
-These data have been stripped of user identifying information, including user name, bio etc. Instead we just have two columns: latitude and longitude. The points are from all tweets that contained in the #WomensMarch. When we plot the simple latitude and longitude of the points, we can make out the vague outline of countries. This becomes clearer once we convert the latitude and longitude columns into its proper object class--a "SpatialPointsDataFrame". By doing this, we can set the CRS or "Coordinate Reference System," which controls the "projection" of the map we wish to visualize--i.e., how it looks. For more info. on map projections, see [this guide](https://docs.qgis.org/2.8/en/docs/gentle_gis_introduction/coordinate_reference_systems.html).
+These data have been stripped of user identifying information, including user name, bio etc. Instead we just have two columns: latitude and longitude. The points are from all tweets that contained in the #WomensMarch. When we plot the simple latitude and longitude of the points, we can make out the vague outline of countries. 
 
+In order to identify points within the routes of our targeted protest marches, we first read in three shapefiles. Each of these have been created by drawing a buffer of increasing sizes around the route of the 2017 Washington D.C. Women's March. 
 
 
 ```r
@@ -230,8 +238,6 @@ route50 <- readOGR("shapes/wm_route_example50.shp")
 route100 <- readOGR("shapes/wm_route_example100.shp")
 route1000 <- readOGR("shapes/wm_route_example1000.shp")
 ```
-
-We first read in three shapefiles. Each of these have been created by drawing a buffer of increasing sizes around the route of the 2017 Washington D.C. Women's March. 
 
 
 
@@ -248,13 +254,17 @@ plot(route1000, main="1000m buffer")
 
 ![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-We demonstrate below, however, that it is not completely necessary to use these more accurate geographic projections of protest routes. In fact, the use of a rectangular bounding box is able to capture these same protestors, with limited cost in terms of inaccuracy. To find the coordinates of a bounding box, we recommend using the open-source OpenStreetMap platform.
+We can create these shapefiles with relative ease in open-source GIS softwares like QGIS.
+
+It is not completely necessary to use these more accurate geographic projections of protest routes, however. In fact, the use of a rectangular bounding box is able to capture these same protestors, with limited cost in terms of inaccuracy. To find the coordinates of a bounding box, we recommend using the open-source OpenStreetMap platform.
 
 As shown below, by searching a location in OpenStreetMap, and selecting the "Export" option at the top of the window, we are able to view the coordinates of the left-upper and right-lower diagonals of the map displayed in the viewer window. The user can zoom in and out on this map in order to select an appropriate geographical area.
 
 ![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
-To generate a rectangular bounding box object from these four coordinates, we simply need to combine them into a matrix for the purposes of plotting. We can then convert this into a spatial object, and assign the relevant CRS--the same as we assigned to our spatial points above. We have labelled the coordinates in this image. From these coordinates, we can easily now generate a SpatialPolygons bounding box by combing the x1, y1, x2, and y2 coordinates into a matrix
+To generate a rectangular bounding box object from these four coordinates, we simply need to combine them into a matrix for the purposes of plotting. We can then convert this into a spatial object, and assign the relevant CRS--the same as we assigned to our spatial points above.
+
+We show the coordinates in the image above. From these coordinates, we can easily now generate a SpatialPolygons bounding box by combing the x1, y1, x2, and y2 coordinates into a matrix
 
 
 ```r
@@ -410,7 +420,7 @@ plot(pts_subset, add=T, col="red")
 
 ![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-10-4.png)<!-- -->
 
-We limit our subsequent analysis to D.C. only, and have provided you with a sample dataset containing a subset of 500 users who tweeted from D.C about the Women's March on the day of the protest. We have changed the names and status ids of all tweets in the data, and have only uploaded information on a few key variables.
+We have also provided you with a sample dataset containing a subset of 500 users who tweeted from D.C about the Women's March on the day of the protest. We have changed the names and status ids of all tweets in the data, and have only uploaded information on a few key variables.
 
 To load the dataset, run the following code: 
 
@@ -470,7 +480,9 @@ wm_dc %>%
 </tbody>
 </table>
 
-One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. The above, using open source GIS softwares, means we can easily locate individuals to within the route of a protest march, providing a confident measure of participation
+One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
+
+The above, using open source GIS softwares, means we can easily locate individuals to within the route of a protest march, providing a confident measure of participation.
 
 # Estimating ideology
 
@@ -492,7 +504,9 @@ ideo <- estimateIdeology2(user, friends)
 
 # Some other ways to use Twitter data
 
-This is only the beginning of what we can do with Twitter data. The code below uses the [`tweetbotornot2`](https://github.com/mkearney/tweetbotornot2) package by Michael Kearney, the author of the `rtweet` package  below predicts how many accounts in our dataset are likely bots, and displays some of their content. 
+This is only the beginning of what we can do with Twitter data. The code below uses the [`tweetbotornot2`](https://github.com/mkearney/tweetbotornot2) package by Michael Kearney, the author of the `rtweet` package, and predicts how many accounts in our Black Lives Matter tweets dataset are likely bots.
+
+We plot a histogram of predicted likely bot accounts below, along with a short selection of some of the tweets.
 
 
 ```r
@@ -543,6 +557,26 @@ ggplot(bots_p) +
   <tr>
    <td style="text-align:left;"> say_the_names </td>
    <td style="text-align:left;"> Michael Dean #BlackLivesMatter </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> BLMProtestBot </td>
+   <td style="text-align:left;"> If you're reading this, remember that #BlackLivesMatter </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> say_the_names </td>
+   <td style="text-align:left;"> John Crawford III #BlackLivesMatter </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tbasharks </td>
+   <td style="text-align:left;"> Wed Jul 29 2020 Portland, Oregon - Independent journalist arrested WATCH: https://t.co/3PUJqzKHfX #PortlandOregon #PPD #blacklivesmatter #blm #defundthepolice #abolishthepolice </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tbasharks </td>
+   <td style="text-align:left;"> Sat May 30 2020 Austin, Texas - Police shoot non-violent protester in the head WATCH: https://t.co/tMCKqCxjkp #AustinTexas #APD #blacklivesmatter #blm #defundthepolice #abolishthepolice </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> TheLivesThatMtr </td>
+   <td style="text-align:left;"> Say their name. Derrick Lee Hunt, 2015-08-07 #BlackLivesMatter. </td>
   </tr>
 </tbody>
 </table>
