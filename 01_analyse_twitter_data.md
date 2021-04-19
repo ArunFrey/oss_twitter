@@ -81,7 +81,7 @@ library(tweetscores)
 theme_set(theme_minimal())
 ```
 
-## Connect to Twitter's API
+## Connect to Twitter's API 
 
 Below we will briefly describe how to obtain access to Twitter's API. For a more detailed description of the authenticaction process, read the following vignette by Michael W. Kearney, the creator of the package. 
 
@@ -126,6 +126,12 @@ token <- create_token(
 The `create_token()` function will save your access token as an environment variable for you. This way, the `rtweet` package will automatically find the token next time you try to access the Twitter API. 
 
 Once you have all of these keys and tokens recorded somewhere safe, you are ready to collect data!
+
+## Connect to Twitter's API via `academictwitteR`
+
+Recently, Twitter released their **Academic Research product track**, which allows researchers to access more detailed Twitter data, including historic data, at no rate limit restrictions. Chris has released a great new package, `academictwitteR`, to enable `R` users to interact with the academic research product track. You can find out more about his package and download the most recent version [here](https://github.com/cjbarrie/academictwitteR). 
+
+
 
 ## Querying the Twitter API with `rtweet`
 
@@ -212,7 +218,7 @@ What would your country's police score in your opinion?🤔
 </tbody>
 </table>
 
-These tweets all occur within quick succession of each other (Note: here, the tweets were collected in advance of the workshop, explaining why the dates are not more recent). In fact, we can visualise the frequency of the tweets. We could use the `ggplot` package for this, but `rtweet` already has a built in function to easily visualise time serie of Twitter data.
+These tweets all occur within quick succession of each other (Note: here, the tweets were collected in advance of the workshop, explaining why the dates are not more recent). In fact, we can visualise the frequency of the tweets. We could use the `ggplot` package for this, but `rtweet` already has a built in function to easily visualise time-series of Twitter data.
 
 
 ```r
@@ -248,13 +254,6 @@ wm_geo <- readRDS("data/geo_raw.rds") %>%
 
 
 ```r
-# alternatively, load direclty from the github website
-wm_geo <- readRDS(url("https://raw.githack.com/ArunFrey/oss_twitter/main/data/geo_raw.rds")) %>% 
-  mutate_all(as.numeric) 
-```
-
-
-```r
 # generate a spacialpoints dataframe (order must be long/lat)
 xy <- wm_geo[,c(1,2)]
 points <- SpatialPointsDataFrame(coords = xy, data = xy,
@@ -263,7 +262,7 @@ points <- SpatialPointsDataFrame(coords = xy, data = xy,
 plot(points)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 These data have been stripped of user identifying information, including user name, bio etc. Instead we just have two columns: latitude and longitude. The points are from all tweets that contained in the #WomensMarch. When we plot the simple latitude and longitude of the points, we can make out the vague outline of countries. 
 
@@ -290,7 +289,7 @@ plot(route100, main="100m buffer")
 plot(route1000, main="1000m buffer")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 We can create these shapefiles with relative ease in open-source GIS softwares like QGIS.
 
@@ -324,7 +323,7 @@ bb <- SpatialPolygons(list(Polygons(list(P1), ID = "a")),
 plot(bb)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 We compare our bounding box shape to our route buffer shapes below. 
 
@@ -373,7 +372,7 @@ pts_subset <- points[bb,]
 plot(pts_subset, add=T, col="black")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 
 ```r
@@ -398,7 +397,7 @@ pts_subset <- points[route50,]
 plot(pts_subset, add=T, col="blue")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
 

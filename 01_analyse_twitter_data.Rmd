@@ -81,7 +81,7 @@ library(tweetscores)
 theme_set(theme_minimal())
 ```
 
-## Connect to Twitter's API
+## Connect to Twitter's API 
 
 Below we will briefly describe how to obtain access to Twitter's API. For a more detailed description of the authenticaction process, read the following vignette by Michael W. Kearney, the creator of the package. 
 
@@ -126,6 +126,12 @@ The `create_token()` function will save your access token as an environment vari
 
 Once you have all of these keys and tokens recorded somewhere safe, you are ready to collect data!
 
+## Connect to Twitter's API via `academictwitteR`
+
+Recently, Twitter released their **Academic Research product track**, which allows researchers to access more detailed Twitter data, including historic data, at no rate limit restrictions. Chris has released a great new package, `academictwitteR`, to enable `R` users to interact with the academic research product track. You can find out more about his package and download the most recent version [here](https://github.com/cjbarrie/academictwitteR). 
+
+
+
 ## Querying the Twitter API with `rtweet`
 
 The `rtweet` package makes it very easy to collect and analyse Twitter data, including individual tweets, or follower and friendship networks.
@@ -167,7 +173,7 @@ blm_tweets %>%
   kable_styling(c("striped", "hover", "condensed", "responsive"))
 ```
 
-These tweets all occur within quick succession of each other (Note: here, the tweets were collected in advance of the workshop, explaining why the dates are not more recent). In fact, we can visualise the frequency of the tweets. We could use the `ggplot` package for this, but `rtweet` already has a built in function to easily visualise time serie of Twitter data.
+These tweets all occur within quick succession of each other (Note: here, the tweets were collected in advance of the workshop, explaining why the dates are not more recent). In fact, we can visualise the frequency of the tweets. We could use the `ggplot` package for this, but `rtweet` already has a built in function to easily visualise time-series of Twitter data.
 
 ```{r plot timeline, message = F}
 # plot a time series of all tweets in our data.
