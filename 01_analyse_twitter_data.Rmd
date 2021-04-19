@@ -139,7 +139,7 @@ blm_tweets <- search_tweets("#BLM OR #BlackLivesMatter",
 
 Since many of you may not have obtained a developers account, we have uploaded a sample dataset to allow you to familiarise yourself with data from the Twitter API. To download the data, clone [our Github repository](https://github.com/ArunFrey/oss_twitter), navigate to the downloaded folders, and run all code in the corresponding R markdown file (`01_analyse_twitter_data.Rmd`). 
 
-Alternatively, you can also download all datasets directly from the Github website: 
+Alternatively, you can also download all datasets directly from the Github website. Note that you will have to add "https://raw.githack.com/ArunFrey/oss_twitter/main/" to all subsequent file paths to download the data, so we encourage working from within the cloned Github repo instead.
 
 ```{r , eval=F}
 blm_tweets <- readRDS("data/BLMtweets.rds")
