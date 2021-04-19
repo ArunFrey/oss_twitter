@@ -215,12 +215,6 @@ wm_geo <- readRDS("data/geo_raw.rds") %>%
   mutate_all(as.numeric) 
 ```
 
-```{r, eval = F}
-# alternatively, load direclty from the github website
-wm_geo <- readRDS(url("https://raw.githack.com/ArunFrey/oss_twitter/main/data/geo_raw.rds")) %>% 
-  mutate_all(as.numeric) 
-```
-
 ```{r}
 # generate a spacialpoints dataframe (order must be long/lat)
 xy <- wm_geo[,c(1,2)]
