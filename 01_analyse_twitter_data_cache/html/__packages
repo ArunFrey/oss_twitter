@@ -10,13 +10,13 @@ stringr
 forcats
 rtweet
 kableExtra
-remotes
-tweetbotornot2
+magick
 sp
 rgdal
-sf
-magick
+tidytext
 coda
 boot
 R2WinBUGS
 tweetscores
+remotes
+tweetbotornot2

@@ -56,6 +56,11 @@ We will be using the following packages in the exercise, so make sure to have th
 install.packages("tidyverse")
 install.packages("rtweet")
 install.packages("kableExtra")
+install.packages("magick")
+install.packages("rgdal")
+install.packages("sp")
+install.packages("tidytext")
+install.packages("devtools")
 library(devtools)
 install_github("pablobarbera/twitter_ideology/pkg/tweetscores")
 ```
@@ -66,9 +71,10 @@ install_github("pablobarbera/twitter_ideology/pkg/tweetscores")
 library(tidyverse)
 library(rtweet)
 library(kableExtra)
-library(sp)
+library(magick)
 library(rgdal)
-library(sf)
+library(sp)
+library(tidytext)
 library(tweetscores)
 
 # setting the plot theme
@@ -218,7 +224,11 @@ Manipulating the data in this way will be helpful when clipping to the boundarie
 
 
 ```r
-#order must be long/lat
+# let's begin by loading the data
+wm_geo <- readRDS("data/geo_raw.rds") %>% 
+  mutate_all(as.numeric)
+
+# generate a spacialpoints dataframe (order must be long/lat)
 xy <- wm_geo[,c(1,2)]
 points <- SpatialPointsDataFrame(coords = xy, data = xy,
                                proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
@@ -234,12 +244,13 @@ In order to identify points within the routes of our targeted protest marches, w
 
 
 ```r
-route50 <- readOGR("shapes/wm_route_example50.shp")
-route100 <- readOGR("shapes/wm_route_example100.shp")
-route1000 <- readOGR("shapes/wm_route_example1000.shp")
+route50 <- readOGR("shapes/wm_route_example50.shp", verbose = FALSE)
+route100 <- readOGR("shapes/wm_route_example100.shp", verbose = FALSE)
+route1000 <- readOGR("shapes/wm_route_example1000.shp", verbose = FALSE)
+
+# we also load an image of the women's march protest
+routeimg <- image_read("images/wm_march_map.jpg")
 ```
-
-
 
 We can compare these to the original march route below:
 
@@ -252,15 +263,15 @@ plot(route100, main="100m buffer")
 plot(route1000, main="1000m buffer")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 We can create these shapefiles with relative ease in open-source GIS softwares like QGIS.
 
-It is not completely necessary to use these more accurate geographic projections of protest routes, however. In fact, the use of a rectangular bounding box is able to capture these same protestors, with limited cost in terms of inaccuracy. To find the coordinates of a bounding box, we recommend using the open-source OpenStreetMap platform.
+It is not completely necessary to use these more accurate geographic projections of protest routes, however. In fact, the use of a rectangular bounding box is able to capture these same protestors, with limited cost in terms of inaccuracy. To find the coordinates of a bounding box, we recommend using the open-source [*OpenStreetMap*](https://www.openstreetmap.org) platform.
 
 As shown below, by searching a location in OpenStreetMap, and selecting the "Export" option at the top of the window, we are able to view the coordinates of the left-upper and right-lower diagonals of the map displayed in the viewer window. The user can zoom in and out on this map in order to select an appropriate geographical area.
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](images/osm_figure.png){width=100%}
 
 To generate a rectangular bounding box object from these four coordinates, we simply need to combine them into a matrix for the purposes of plotting. We can then convert this into a spatial object, and assign the relevant CRS--the same as we assigned to our spatial points above.
 
@@ -286,7 +297,7 @@ bb <- SpatialPolygons(list(Polygons(list(P1), ID = "a")),
 plot(bb)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 We compare our bounding box shape to our route buffer shapes below. 
 
@@ -295,51 +306,10 @@ We compare our bounding box shape to our route buffer shapes below.
 #set consistent CRS
 CRS.new<-CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 proj4string(route50) <- CRS.new 
-```
-
-```
-## Warning in proj4string(obj): CRS object has comment, which is lost in output
-```
-
-```
-## Warning in `proj4string<-`(`*tmp*`, value = new("CRS", projargs = "+proj=longlat +datum=WGS84 +no_defs")): A new CRS was assigned to an object with an existing CRS:
-## +proj=merc +lat_ts=0 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs
-## without reprojecting.
-## For reprojection, use function spTransform
-```
-
-```r
 proj4string(route100) <- CRS.new 
-```
-
-```
-## Warning in proj4string(obj): CRS object has comment, which is lost in output
-
-## Warning in proj4string(obj): A new CRS was assigned to an object with an existing CRS:
-## +proj=merc +lat_ts=0 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs
-## without reprojecting.
-## For reprojection, use function spTransform
-```
-
-```r
 proj4string(route1000) <- CRS.new 
-```
 
-```
-## Warning in proj4string(obj): CRS object has comment, which is lost in output
-
-## Warning in proj4string(obj): A new CRS was assigned to an object with an existing CRS:
-## +proj=merc +lat_ts=0 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs
-## without reprojecting.
-## For reprojection, use function spTransform
-```
-
-```r
-par(mfrow=c(2,4))
-plot(route50)
-plot(route100)
-plot(route1000)
-plot(bb)
+par(mfrow=c(2,2))
 plot(bb)
 plot(route50,add=T)
 plot(bb)
@@ -349,7 +319,7 @@ plot(route1000,add=T)
 plot(bb)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/plot boxes with protestors-1.png)<!-- -->
 
 We can see that our rectangular bounding box shape covers a larger area than march route shapes. If we think this bounding box is too large, we can always reduce it in size by lifting new coordinates from OpenStreetMap, converting to a matrix, and generating a smaller spatial bounding box. For now, we will continue with the bounding box we have generated.
 
@@ -376,7 +346,7 @@ pts_subset <- points[bb,]
 plot(pts_subset, add=T, col="red")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 
 ```r
@@ -388,7 +358,7 @@ pts_subset <- points[route50,]
 plot(pts_subset, add=T, col="red")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 ```r
 plot(bb, axes=T)
@@ -399,7 +369,7 @@ pts_subset <- points[route100,]
 plot(pts_subset, add=T, col="red")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-2.png)<!-- -->
 
 ```r
 plot(bb, axes=T)
@@ -410,7 +380,7 @@ pts_subset <- points[route1000,]
 plot(pts_subset, add=T, col="red")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-10-3.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-3.png)<!-- -->
 
 ```r
 plot(bb, axes=T)
@@ -418,8 +388,13 @@ pts_subset <- points[bb,]
 plot(pts_subset, add=T, col="red")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-10-4.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-4.png)<!-- -->
 
+One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
+
+The above, using open source GIS softwares, means we can easily locate individuals to within the route of a protest march, providing a confident measure of participation.
+
+# Protest hashtags
 We have also provided you with a sample dataset containing a subset of 500 users who tweeted from D.C about the Women's March on the day of the protest. We have changed the names and status ids of all tweets in the data, and have only uploaded information on a few key variables.
 
 To load the dataset, run the following code: 
@@ -480,15 +455,31 @@ wm_dc %>%
 </tbody>
 </table>
 
-One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
+We can look at which hashtags were used most frequently during the march in DC. To do that, we use the `hashtags` variable, which lists the hashtags used in each tweet. To separate multiple hashtags into individual rows, we use the `unnest_tokens` command from the `tidytext` package. The plot below visualises all hashtags that were used at least 10 times during the 2017 Women's March in DC.
 
-The above, using open source GIS softwares, means we can easily locate individuals to within the route of a protest march, providing a confident measure of participation.
+
+```r
+wm_dc %>% 
+  # this command divides multiple hashtags separated by a space into individual rows
+  unnest_tokens(output = hashtag, input = hashtags) %>% 
+  group_by(hashtag) %>%
+  count() %>% 
+  na.omit() %>%
+  filter(n >= 10) %>%
+  ggplot(aes(x = n, y = reorder(hashtag, n))) +
+  geom_bar(stat = "identity") + 
+  ylab("Hashtag") + 
+  xlab("")
+```
+
+![](01_analyse_twitter_data_files/figure-html/plot hashtags-1.png)<!-- -->
+
 
 # Estimating ideology
 
-Once we have located our protestor-users, the esimation of their ideological position (based on their follow network) is straightforward using the `tweetscores` package by Pablo Barberá. We will not estimate the ideologies of our users above as they have been anonymized. But you can certainly look at your own: simply change the user name to your own Twitter username. 
+Once we have located our protestor-users, the estimation of their ideological position (based on their follow network) is straightforward using the `tweetscores` package by Pablo Barberá. We will not estimate the ideologies of our users above as they have been anonymized. But you can certainly look at your own: simply change the user name to your own Twitter username. 
 
-Note: you will also need to set up your authentication token following the steps outlined by Barberá [here](https://github.com/pablobarbera/twitter_ideology)
+Note: you will also need to use the authentication token you created above to download the following network of Twitter users. For more information follow the steps outlined by Barberá [here](https://github.com/pablobarbera/twitter_ideology)
 
 
 ```r
@@ -513,11 +504,11 @@ We plot a histogram of predicted likely bot accounts below, along with a short s
 library(remotes) # install remotes package if necessary
 library(tweetbotornot2) # install from github if necessary 
 
-bots_p <- predict_bot(blm_tweets)
+bots_p <- predict_bot(blm_tweets, )
 ```
 
 ```
-## [10:30:05] WARNING: amalgamation/../src/learner.cc:790: Loading model from XGBoost < 1.0.0, consider saving it again for improved compatibility
+## [20:11:22] WARNING: amalgamation/../src/learner.cc:790: Loading model from XGBoost < 1.0.0, consider saving it again for improved compatibility
 ```
 
 ```r
