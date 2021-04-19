@@ -137,8 +137,20 @@ blm_tweets <- search_tweets("#BLM OR #BlackLivesMatter",
                            n = 1500, include_rts = FALSE)
 ```
 
-```{r, echo=F}
+Since many of you may not have obtained a developers account, we have uploaded a sample dataset to allow you to familiarise yourself with data from the Twitter API. To download the data, clone [our Github repository](https://github.com/ArunFrey/oss_twitter), navigate to the downloaded folders, and run all code in the corresponding R markdown file (`01_analyse_twitter_data.Rmd`). 
+
+Alternatively, you can also download all datasets directly from the Github website: 
+
+```{r , eval=F}
 blm_tweets <- readRDS("data/BLMtweets.rds")
+```
+
+```{r load twitter, message=F, eval = F}
+# load the data from within the cloned Github folder
+blm_tweets <- readRDS("data/BLMtweets.rds")
+
+# alternatively, download the data directly from Github
+blm_tweets <- readRDS(url("https://raw.githack.com/ArunFrey/oss_twitter/main/data/BLMtweets.rds"))
 ```
 
 The Twitter API allows us to retrieve a lot of information about tweets and users, but let's stick with a few for now. 
@@ -196,12 +208,20 @@ We can manipulate these data into a `SpatialPointsDataFrame`, making sure the CR
 
 Manipulating the data in this way will be helpful when clipping to the boundaries of shapefiles as we go on to describe below.
 
+Let's begin by loading the data: 
 ```{r}
-
-# let's begin by loading the data
+# load the data 
 wm_geo <- readRDS("data/geo_raw.rds") %>% 
-  mutate_all(as.numeric)
+  mutate_all(as.numeric) 
+```
 
+```{r, eval = F}
+# alternatively, load direclty from the github website
+wm_geo <- readRDS(url("https://raw.githack.com/ArunFrey/oss_twitter/main/data/geo_raw.rds")) %>% 
+  mutate_all(as.numeric) 
+```
+
+```{r}
 # generate a spacialpoints dataframe (order must be long/lat)
 xy <- wm_geo[,c(1,2)]
 points <- SpatialPointsDataFrame(coords = xy, data = xy,
@@ -296,12 +316,12 @@ par(mfrow=c(2,2))
 
 plot(route50)
 pts_subset <- points[route50,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="blue")
 
 
 plot(route100)
 pts_subset <- points[route100,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="green")
 
 plot(route1000)
 pts_subset <- points[route1000,]
@@ -309,7 +329,7 @@ plot(pts_subset, add=T, col="red")
 
 plot(bb)
 pts_subset <- points[bb,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="black")
 
 ```
 

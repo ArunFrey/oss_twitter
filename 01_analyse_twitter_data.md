@@ -139,7 +139,23 @@ blm_tweets <- search_tweets("#BLM OR #BlackLivesMatter",
                            n = 1500, include_rts = FALSE)
 ```
 
+Since many of you may not have obtained a developers account, we have uploaded a sample dataset to allow you to familiarise yourself with data from the Twitter API. To download the data, clone [our Github repository](https://github.com/ArunFrey/oss_twitter), navigate to the downloaded folders, and run all code in the corresponding R markdown file (`01_analyse_twitter_data.Rmd`). 
 
+Alternatively, you can also download all datasets directly from the Github website: 
+
+
+```r
+blm_tweets <- readRDS("data/BLMtweets.rds")
+```
+
+
+```r
+# load the data from within the cloned Github folder
+blm_tweets <- readRDS("data/BLMtweets.rds")
+
+# alternatively, download the data directly from Github
+blm_tweets <- readRDS(url("https://raw.githack.com/ArunFrey/oss_twitter/main/data/BLMtweets.rds"))
+```
 
 The Twitter API allows us to retrieve a lot of information about tweets and users, but let's stick with a few for now. 
 
@@ -222,12 +238,23 @@ We can manipulate these data into a `SpatialPointsDataFrame`, making sure the CR
 
 Manipulating the data in this way will be helpful when clipping to the boundaries of shapefiles as we go on to describe below.
 
+Let's begin by loading the data: 
 
 ```r
-# let's begin by loading the data
+# load the data 
 wm_geo <- readRDS("data/geo_raw.rds") %>% 
-  mutate_all(as.numeric)
+  mutate_all(as.numeric) 
+```
 
+
+```r
+# alternatively, load direclty from the github website
+wm_geo <- readRDS(url("https://raw.githack.com/ArunFrey/oss_twitter/main/data/geo_raw.rds")) %>% 
+  mutate_all(as.numeric) 
+```
+
+
+```r
 # generate a spacialpoints dataframe (order must be long/lat)
 xy <- wm_geo[,c(1,2)]
 points <- SpatialPointsDataFrame(coords = xy, data = xy,
@@ -236,7 +263,7 @@ points <- SpatialPointsDataFrame(coords = xy, data = xy,
 plot(points)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 These data have been stripped of user identifying information, including user name, bio etc. Instead we just have two columns: latitude and longitude. The points are from all tweets that contained in the #WomensMarch. When we plot the simple latitude and longitude of the points, we can make out the vague outline of countries. 
 
@@ -263,7 +290,7 @@ plot(route100, main="100m buffer")
 plot(route1000, main="1000m buffer")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 We can create these shapefiles with relative ease in open-source GIS softwares like QGIS.
 
@@ -297,7 +324,7 @@ bb <- SpatialPolygons(list(Polygons(list(P1), ID = "a")),
 plot(bb)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 We compare our bounding box shape to our route buffer shapes below. 
 
@@ -330,12 +357,12 @@ par(mfrow=c(2,2))
 
 plot(route50)
 pts_subset <- points[route50,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="blue")
 
 
 plot(route100)
 pts_subset <- points[route100,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="green")
 
 plot(route1000)
 pts_subset <- points[route1000,]
@@ -343,10 +370,10 @@ plot(pts_subset, add=T, col="red")
 
 plot(bb)
 pts_subset <- points[bb,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="black")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 
 ```r
@@ -371,7 +398,7 @@ pts_subset <- points[route50,]
 plot(pts_subset, add=T, col="blue")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
 
