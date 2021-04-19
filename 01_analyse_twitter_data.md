@@ -350,49 +350,32 @@ plot(pts_subset, add=T, col="red")
 
 
 ```r
-plot(bb, axes=T)
+# plot all points that fall within buffer box
+plot(bb, axes = T)
 pts_subset <- points[bb,]
 plot(pts_subset,add=T)
+
+# add 1000m buffer (in red)
+plot(route1000, add=T)
+pts_subset <- points[route1000,]
+plot(pts_subset, add=T, col="red")
+
+#add 100m buffer (in green)
+plot(route100, add=T)
+pts_subset <- points[route100,]
+plot(pts_subset, add=T, col="green")
+
+# add 50m buffer (in blue)
 plot(route50, add=T)
 pts_subset <- points[route50,]
-plot(pts_subset, add=T, col="red")
+plot(pts_subset, add=T, col="blue")
 ```
 
 ![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-```r
-plot(bb, axes=T)
-pts_subset <- points[bb,]
-plot(pts_subset,add=T)
-plot(route100, add=T)
-pts_subset <- points[route100,]
-plot(pts_subset, add=T, col="red")
-```
-
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-2.png)<!-- -->
-
-```r
-plot(bb, axes=T)
-pts_subset <- points[bb,]
-plot(pts_subset,add=T)
-plot(route1000, add=T)
-pts_subset <- points[route1000,]
-plot(pts_subset, add=T, col="red")
-```
-
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-3.png)<!-- -->
-
-```r
-plot(bb, axes=T)
-pts_subset <- points[bb,]
-plot(pts_subset, add=T, col="red")
-```
-
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-4.png)<!-- -->
-
 One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
 
-The above, using open source GIS softwares, means we can easily locate individuals to within the route of a protest march, providing a confident measure of participation.
+The above, using open source GIS softwares, means we can **easily locate individuals to within the route of a protest march**, providing a confident measure of participation.
 
 # Protest hashtags
 We have also provided you with a sample dataset containing a subset of 500 users who tweeted from D.C about the Women's March on the day of the protest. We have changed the names and status ids of all tweets in the data, and have only uploaded information on a few key variables.
@@ -455,13 +438,12 @@ wm_dc %>%
 </tbody>
 </table>
 
-We can look at which hashtags were used most frequently during the march in DC. To do that, we use the `hashtags` variable, which lists the hashtags used in each tweet. To separate multiple hashtags into individual rows, we use the `unnest_tokens` command from the `tidytext` package. The plot below visualises all hashtags that were used at least 10 times during the 2017 Women's March in DC.
+We can look at which hashtags were used most frequently during the march in DC. To do that, we use the `hashtags` variable, which lists the hashtags used in each tweet. To separate multiple hashtags into individual rows, we use the `unnest_tokens` command from the `tidytext` package. The plot below visualises all hashtags that were used at least 10 times during the 2017 Women's March in DC. 
 
 
 ```r
 wm_dc %>% 
-  # this command divides multiple hashtags separated by a space into individual rows
-  unnest_tokens(output = hashtag, input = hashtags) %>% 
+  unnest_tokens(output = hashtag, input = hashtags) %>%  # this divides words separated by space into individual rows
   group_by(hashtag) %>%
   count() %>% 
   na.omit() %>%
@@ -478,8 +460,7 @@ wm_dc %>%
 # Estimating ideology
 
 Once we have located our protestor-users, the estimation of their ideological position (based on their follow network) is straightforward using the `tweetscores` package by Pablo Barberá. We will not estimate the ideologies of our users above as they have been anonymized. But you can certainly look at your own: simply change the user name to your own Twitter username. 
-
-Note: you will also need to use the authentication token you created above to download the following network of Twitter users. For more information follow the steps outlined by Barberá [here](https://github.com/pablobarbera/twitter_ideology)
+Note: you will also need to use the authentication token (here: `my_oauth_CB`) you created above to download the following network of Twitter users. For more information follow the steps outlined by Barberá [here](https://github.com/pablobarbera/twitter_ideology)
 
 
 ```r
@@ -488,9 +469,14 @@ library(tweetscores)
 user <- "cbarrie"
 friends <- getFriends(screen_name=user, oauth = "my_oauth_CB")
 
-ideo <- estimateIdeology2(user, friends)
+ideo <- estimateIdeology(user, friends)
+
+plot(ideo)
 ```
 
+![](01_analyse_twitter_data_files/figure-html/plot chris ideology-1.png)<!-- -->
+
+If you want to estimate the ideology for multiple users, we suggest opting for Maximum Likelihood estimation, which is considerably faster. You can do this by using the `estimateIdeology2` function (see [here](https://github.com/pablobarbera/twitter_ideology/blob/master/pkg/tweetscores/R/utils.R) for the estimation functions for each of these two approaches.)
 
 
 # Some other ways to use Twitter data
@@ -504,11 +490,11 @@ We plot a histogram of predicted likely bot accounts below, along with a short s
 library(remotes) # install remotes package if necessary
 library(tweetbotornot2) # install from github if necessary 
 
-bots_p <- predict_bot(blm_tweets, )
+bots_p <- predict_bot(blm_tweets)
 ```
 
 ```
-## [20:11:22] WARNING: amalgamation/../src/learner.cc:790: Loading model from XGBoost < 1.0.0, consider saving it again for improved compatibility
+## [10:37:35] WARNING: amalgamation/../src/learner.cc:790: Loading model from XGBoost < 1.0.0, consider saving it again for improved compatibility
 ```
 
 ```r
