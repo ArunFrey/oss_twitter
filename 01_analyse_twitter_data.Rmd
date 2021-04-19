@@ -128,8 +128,13 @@ Once you have all of these keys and tokens recorded somewhere safe, you are read
 
 ## Connect to Twitter's API via `academictwitteR`
 
-Recently, Twitter released their **Academic Research product track**, which allows researchers to access more detailed Twitter data, including historic data, at no rate limit restrictions. Chris has released a great new package, `academictwitteR`, to enable `R` users to interact with the academic research product track. You can find out more about his package and download the most recent version [here](https://github.com/cjbarrie/academictwitteR). 
+Recently, Twitter released their **Academic Research product track**, which allows researchers to access more detailed Twitter data, including historic data, at no rate limit restrictions. This is terrific news for those of us working with Twitter data.
 
+Chris is working on a fantastic new package, `academictwitteR`, to enable `R` users to interact with the academic research product track. You can find out more about his package and download the most recent version [here](https://github.com/cjbarrie/academictwitteR), or install it via: 
+
+```{r, eval = F}
+devtools::install_github("cjbarrie/academictwitteR")
+```
 
 
 ## Querying the Twitter API with `rtweet`
