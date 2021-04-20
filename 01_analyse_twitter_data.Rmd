@@ -2,7 +2,7 @@
 title: "Oxford Spring School in Advanced Research Methods"
 author:
   name: Arun Frey & Christopher Barrie
-  affiliation: University of Oxford & University of Edinburgh
+  affiliation: University of Oxford & University of Edinburgh | [GitHub](https://github.com/ArunFrey/oss_twitter) 
 output: 
   html_document:
     theme: flatly
@@ -126,7 +126,7 @@ The `create_token()` function will save your access token as an environment vari
 
 Once you have all of these keys and tokens recorded somewhere safe, you are ready to collect data!
 
-## Connect to Twitter's API via `academictwitteR`
+## Querying the Twitter API with `academictwitteR`
 
 Recently, Twitter released their **Academic Research product track**, which allows researchers to access more detailed Twitter data, including historic data, at no rate limit restrictions. This is terrific news for those of us working with Twitter data.
 
@@ -139,7 +139,26 @@ devtools::install_github("cjbarrie/academictwitteR")
 
 ## Querying the Twitter API with `rtweet`
 
-The `rtweet` package makes it very easy to collect and analyse Twitter data, including individual tweets, or follower and friendship networks.
+The `rtweet` package makes it very easy to collect and analyse Twitter data, including individual tweets, or follower and friendship networks: 
+
+```{r, eval = F}
+
+# search tweets containing #rstats
+search_tweets("#rstats", n = 10000, include_rts = FALSE)
+
+# search users mentioning #rstats in profile
+search_users("#rstats", n = 1000)
+
+# randomly sample (1%) of all live tweets
+stream_tweets("")
+
+## get accounts followed by CNN
+get_friends("bbc")
+
+## get accounts following CNN
+get_followers("bbc", n = 10000)
+
+```
 
 Let's begin by collecting the last tweets mentioning the hashtag #BLM or #BlackLivesMatter. We are collecting 1500 tweets here, but you can choose a higher or lower number of tweets. Note that, to return more than 18,000 tweets in a single call, users must set `retryonratelimit = TRUE`. Here, we have set `include_rts = FALSE` meaning that all of our tweets are original tweets rather than retweets.
 

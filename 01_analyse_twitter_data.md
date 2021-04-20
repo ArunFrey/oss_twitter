@@ -2,7 +2,7 @@
 title: "Oxford Spring School in Advanced Research Methods"
 author:
   name: Arun Frey & Christopher Barrie
-  affiliation: University of Oxford & University of Edinburgh
+  affiliation: University of Oxford & University of Edinburgh | [GitHub](https://github.com/ArunFrey/oss_twitter) 
 output: 
   html_document:
     theme: flatly
@@ -127,7 +127,7 @@ The `create_token()` function will save your access token as an environment vari
 
 Once you have all of these keys and tokens recorded somewhere safe, you are ready to collect data!
 
-## Connect to Twitter's API via `academictwitteR`
+## Querying the Twitter API with `academictwitteR`
 
 Recently, Twitter released their **Academic Research product track**, which allows researchers to access more detailed Twitter data, including historic data, at no rate limit restrictions. This is terrific news for those of us working with Twitter data.
 
@@ -141,7 +141,25 @@ devtools::install_github("cjbarrie/academictwitteR")
 
 ## Querying the Twitter API with `rtweet`
 
-The `rtweet` package makes it very easy to collect and analyse Twitter data, including individual tweets, or follower and friendship networks.
+The `rtweet` package makes it very easy to collect and analyse Twitter data, including individual tweets, or follower and friendship networks: 
+
+
+```r
+# search tweets containing #rstats
+rt <- search_tweets("#rstats", n = 10000, include_rts = FALSE)
+
+# search users mentioning #rstats in profile
+usrs <- search_users("#rstats", n = 1000)
+
+# randomly sample (1%) of all live tweets
+rt <- stream_tweets("")
+
+## get accounts followed by CNN
+cnn_fds <- get_friends("cnn")
+
+## get accounts following CNN
+cnn_flw <- get_followers("cnn", n = 10000)
+```
 
 Let's begin by collecting the last tweets mentioning the hashtag #BLM or #BlackLivesMatter. We are collecting 1500 tweets here, but you can choose a higher or lower number of tweets. Note that, to return more than 18,000 tweets in a single call, users must set `retryonratelimit = TRUE`. Here, we have set `include_rts = FALSE` meaning that all of our tweets are original tweets rather than retweets.
 
@@ -268,7 +286,7 @@ points <- SpatialPointsDataFrame(coords = xy, data = xy,
 plot(points)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 These data have been stripped of user identifying information, including user name, bio etc. Instead we just have two columns: latitude and longitude. The points are from all tweets that contained in the #WomensMarch. When we plot the simple latitude and longitude of the points, we can make out the vague outline of countries. 
 
@@ -295,7 +313,7 @@ plot(route100, main="100m buffer")
 plot(route1000, main="1000m buffer")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 We can create these shapefiles with relative ease in open-source GIS softwares like QGIS.
 
@@ -329,7 +347,7 @@ bb <- SpatialPolygons(list(Polygons(list(P1), ID = "a")),
 plot(bb)
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 We compare our bounding box shape to our route buffer shapes below. 
 
@@ -378,7 +396,7 @@ pts_subset <- points[bb,]
 plot(pts_subset, add=T, col="black")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 
 ```r
@@ -403,7 +421,7 @@ pts_subset <- points[route50,]
 plot(pts_subset, add=T, col="blue")
 ```
 
-![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](01_analyse_twitter_data_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 One of the challenges with Twitter data is that it is unclear whether someone who tweets about a protest actually participates in it. Information on the geo-location of users allows us to assess whether or not a user tweeted from within the protest march. 
 
