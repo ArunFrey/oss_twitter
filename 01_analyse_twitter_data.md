@@ -146,19 +146,19 @@ The `rtweet` package makes it very easy to collect and analyse Twitter data, inc
 
 ```r
 # search tweets containing #rstats
-rt <- search_tweets("#rstats", n = 10000, include_rts = FALSE)
+search_tweets("#rstats", n = 10000)
 
 # search users mentioning #rstats in profile
-usrs <- search_users("#rstats", n = 1000)
+search_users("#rstats", n = 1000)
 
-# randomly sample (1%) of all live tweets
-rt <- stream_tweets("")
+# random sample of all live tweets
+stream_tweets("")
 
 ## get accounts followed by CNN
-cnn_fds <- get_friends("cnn")
+get_friends("bbc")
 
 ## get accounts following CNN
-cnn_flw <- get_followers("cnn", n = 10000)
+get_followers("bbc", n = 10000)
 ```
 
 Let's begin by collecting the last tweets mentioning the hashtag #BLM or #BlackLivesMatter. We are collecting 1500 tweets here, but you can choose a higher or lower number of tweets. Note that, to return more than 18,000 tweets in a single call, users must set `retryonratelimit = TRUE`. Here, we have set `include_rts = FALSE` meaning that all of our tweets are original tweets rather than retweets.
@@ -257,16 +257,13 @@ We can see that all 1500 tweets capture only a small fraction of the online disc
 
 # Studying protests using Twitter 
 
-Next, we turn our attention to using Twitter data to study protest events, and focus on the 2017 Women's March protests. Protests are notoriously hard to survey, and Twitter can potentially provide us with valuable insights into who is participating in a demonstration. 
+Next, we turn our attention to using Twitter data to study protest events, and focus on the 2017 Women's March protests. Protests are notoriously hard (and expensive) to survey, and Twitter can potentially provide us with valuable insights into who is participating in a demonstration at little cost to the researcher.
 
-Below is a map of all geolocated tweets that were sent on January 21, 2017, the day of the Women's March protest, showing that users across the world tweeted about the event.
-
+In the map below, you can see that people throughout the world tweeted about the Women's March protest. 
 ![](01_analyse_twitter_data_files/figure-html/load WM data-1.png)<!-- -->
 
-We can manipulate these data into a `SpatialPointsDataFrame`, making sure the CRS is correctly defined, allowing us to plot the points easily using base R plotting functions. The CRS stands for "Coordinate Reference System," which controls the "projection" of the map we wish to visualize--i.e., how it looks. For more info. on map projections, see [this guide](https://docs.qgis.org/2.8/en/docs/gentle_gis_introduction/coordinate_reference_systems.html).
 
-
-Manipulating the data in this way will be helpful when clipping to the boundaries of shapefiles as we go on to describe below.
+We want to use information on their geolocation to see whether users were *close to a protest route* at the time of tweeting, and use this information to differentiate between protest participants and other Twitter users. 
 
 Let's begin by loading the data: 
 
@@ -275,6 +272,12 @@ Let's begin by loading the data:
 wm_geo <- readRDS("data/geo_raw.rds") %>% 
   mutate_all(as.numeric) 
 ```
+
+This data contains the coordinates of all geo-located tweets that were sent out on the day of the Women's March protests. 
+
+We save these coordinates as a `SpatialPointsDataFrame`, which allows us to plot the points easily using base R plotting functions, and also clip the boundaries of shapefiles, which we will describe below. 
+
+Note that have to specify the correct CRS or "Coordinate Reference System" to save coordinates as a `SpatialPointsDataFrame`, which controls the "projection" of the map we wish to visualize--i.e., how it looks. For more info. on map projections, see [this guide](https://docs.qgis.org/2.8/en/docs/gentle_gis_introduction/coordinate_reference_systems.html).
 
 
 ```r
